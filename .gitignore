@@ -1,0 +1,32 @@
+# [1] 가상환경 (Virtual Environments)
+.venv/
+.venv_api/          # 현재 사용 중인 가상환경 폴더
+venv/
+env/
+
+# [2] 파이썬 캐시 및 컴파일 파일
+__pycache__/        # 파이썬 실행 시 생성되는 캐시
+*.py[cod]
+*$py.class
+
+# [3] 환경 변수 및 설정 파일
+.env                # API 키나 비밀 정보가 담긴 파일
+
+# [4] 배포 및 빌드 관련
+dist/
+build/
+*.egg-info/
+
+# [5] 서버 로그 및 업로드 데이터
+app/uploads/* # 사용자가 테스트로 올린 이미지는 제외
+!app/uploads/.gitkeep
+logs/               # TensorBoard 로그 폴더 (필요 시 제외)
+
+# [6] OS 관련 (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+
+.venv_api/
+__pycache__/
+app/uploads/*
