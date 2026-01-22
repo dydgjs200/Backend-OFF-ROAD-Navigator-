@@ -10,6 +10,7 @@ from fastapi import APIRouter, UploadFile, File
 from app.db.session import get_db
 from app.models.users import Users
 from app.schemas.users import UserCreate
+from app.utils.encrypt import get_password_hash
 
 router = APIRouter()
 
@@ -24,7 +25,7 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     new_user = Users(
         user_uuid=str(uuid.uuid4()),
         user_id=user_data.user_id,
-        password=user_data.password
+        password=get_password_hash(user_data.password)
     )
 
     # 3. DB 저장
