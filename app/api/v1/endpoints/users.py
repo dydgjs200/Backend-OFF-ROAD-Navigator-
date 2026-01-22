@@ -10,7 +10,8 @@ from fastapi import APIRouter, UploadFile, File
 from app.db.session import get_db
 from app.models.users import Users
 from app.schemas.users import UserCreate
-from app.utils.encrypt import get_password_hash
+from app.utils.encrypt import get_password_hash, verify_password
+from app.utils.jwt import create_jwt
 
 router = APIRouter()
 
@@ -54,3 +55,28 @@ def delete_user(user_uuid: str, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()  # 오류 시 작업 취소
         raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
+
+@router.post("/login")
+def login(login_data: UserCreate, db: Session = Depends(get_db)):
+    # 1. 유저 확인
+    user = db.query(Users).filter(
+        Users.user_id == login_data.user_id,
+        Users.active == True
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="아이디 또는 비밀번호가 틀렸습니다.")
+    
+    # 2. 유저 비밀번호 확인
+    if not verify_password(login_data.password, user.password):
+        raise HTTPException(status_code=400, detail="아이디 또는 비밀번호가 틀렸습니다.")
+
+    # 3. JWT 발급
+    access_token = create_jwt(data={"sub": user.user_uuid})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_uuid": user.user_uuid
+    }
+    
