@@ -14,8 +14,8 @@ from app.utils.encrypt import get_password_hash
 
 router = APIRouter()
 
-@router.post("/signup")
-def signup(user_data: UserCreate, db: Session = Depends(get_db)):
+@router.post("/create_user")
+def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     # 1. 중복확인
     existing_user = db.query(Users).filter(Users.user_id == user_data.user_id).first()
     if existing_user:
@@ -36,4 +36,21 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
         return {"message": "회원가입 성공", "user_uuid": new_user.user_uuid}
     except Exception as e:
         db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
+
+# soft delete 추가
+@router.delete("/delete_user/{user_uuid}")
+def delete_user(user_uuid: str, db: Session = Depends(get_db)):
+    # 1. 유저 존재 확인
+    user = db.query(Users).filter(Users.user_uuid == user_uuid).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 유저를 찾을 수 없습니다.")
+
+    try:
+        user.active = False
+        db.commit()
+        return {"message": "회원 탈퇴가 완료되었습니다."}
+    except Exception as e:
+        db.rollback()  # 오류 시 작업 취소
         raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
