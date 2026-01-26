@@ -15,7 +15,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Off-Road Navigator API")
 
 # api_router 등록
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 def main():

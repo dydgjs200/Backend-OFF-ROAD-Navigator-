@@ -6,12 +6,14 @@ from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
 from fastapi import APIRouter, UploadFile, File
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.session import get_db
 from app.models.users import Users
 from app.schemas.users import UserCreate
 from app.utils.encrypt import get_password_hash, verify_password
 from app.utils.jwt import create_jwt
+
 
 router = APIRouter()
 
@@ -56,19 +58,24 @@ def delete_user(user_uuid: str, db: Session = Depends(get_db)):
         db.rollback()  # 오류 시 작업 취소
         raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
 
+
 @router.post("/login")
-def login(login_data: UserCreate, db: Session = Depends(get_db)):
-    # 1. 유저 확인
+def login(
+        # 기존 UserLogin 대신 OAuth2PasswordRequestForm을 사용합니다.
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db)
+):
+    # 1. 유저 확인 (form_data.username 사용)
     user = db.query(Users).filter(
-        Users.user_id == login_data.user_id,
+        Users.user_id == form_data.username,  # user_id가 아닌 username으로 들어옵니다.
         Users.active == True
     ).first()
 
     if not user:
         raise HTTPException(status_code=400, detail="아이디 또는 비밀번호가 틀렸습니다.")
-    
-    # 2. 유저 비밀번호 확인
-    if not verify_password(login_data.password, user.password):
+
+    # 2. 유저 비밀번호 확인 (form_data.password 사용)
+    if not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=400, detail="아이디 또는 비밀번호가 틀렸습니다.")
 
     # 3. JWT 발급
@@ -79,4 +86,3 @@ def login(login_data: UserCreate, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user_uuid": user.user_uuid
     }
-    
