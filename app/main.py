@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 import os
 
 from app.db.session import get_db, engine, Base
+from app.models.files import Files
+from app.schemas.fileUpload import FileUpLoadRequest, FileUpLoadResponse
 from app.models.users import Users
 from app.schemas.users import UserCreate
 from app.utils.s3 import upload_file_to_s3

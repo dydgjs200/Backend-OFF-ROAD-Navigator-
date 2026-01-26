@@ -27,7 +27,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
 
     # 2. 활성화 된 유저인지 확인
-    user = db.query(Users).filter(Users.user_uuid == user_uuid, Users.active == True)
+    user = db.query(Users).filter(Users.user_uuid == user_uuid, Users.active == True).first()
     if user is None:
         raise credentials_exception
 
