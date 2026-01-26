@@ -38,3 +38,9 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
     db.refresh(new_file)
 
     return new_file
+
+@router.get("/me", response_model=list[FileUpLoadResponse])
+def get_my_files(db: Session=Depends(get_db), current_user: Users=Depends(get_current_user)):
+    my_files = db.query(Files).filter(Files.user_uuid == current_user.user_uuid)
+
+    return my_files
