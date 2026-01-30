@@ -1,11 +1,10 @@
 import os
 import uuid
-from http.client import HTTPException
 
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.session import get_db
